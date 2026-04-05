@@ -69,10 +69,10 @@ async function deleteTodo(id) {
   saveTodos(filtered);
 }
 
-// 清除所有已完成
-async function clearDone() {
+// 清除选中的已完成
+async function clearSelectedDone(ids) {
   const todos = await loadTodos();
-  const remaining = todos.filter(t => !t.isDone);
+  const remaining = todos.filter(t => !t.isDone || !ids.includes(t.id));
   saveTodos(remaining);
   return remaining;
 }
@@ -103,10 +103,17 @@ function render() {
     const activeTodos = todos.filter(t => !t.isDone);
     const doneTodos = todos.filter(t => t.isDone);
 
+    // 紧急优先排序
+    const sortedActiveTodos = [...activeTodos].sort((a, b) => {
+      if (a.isUrgent && !b.isUrgent) return -1;
+      if (!a.isUrgent && b.isUrgent) return 1;
+      return 0;
+    });
+
     // 渲染全部/紧急列表
     const renderActive = (currentTab === 'urgent')
-      ? activeTodos.filter(t => t.isUrgent)
-      : activeTodos;
+      ? sortedActiveTodos.filter(t => t.isUrgent)
+      : sortedActiveTodos;
 
     renderActive.forEach(todo => {
       allList.appendChild(createTodoElement(todo));
@@ -167,6 +174,12 @@ function createDoneElement(todo) {
     </div>
   `;
 
+  // 复选框点击 - 切换选中状态（不影响完成状态）
+  li.querySelector('.todo-checkbox').addEventListener('click', (e) => {
+    e.stopPropagation();
+    // 复选框切换无需保存状态，DOM自身会反映选中状态
+  });
+
   return li;
 }
 
@@ -212,10 +225,18 @@ function bindEvents() {
     });
   });
 
-  // 清除已完成
-  document.getElementById('clearDoneBtn').addEventListener('click', () => {
-    showConfirm('确定要清除所有已完成项吗？', async () => {
-      await clearDone();
+  // 清除已完成的选中项
+  document.getElementById('clearDoneBtn').addEventListener('click', async () => {
+    const checkedBoxes = document.querySelectorAll('#doneList .todo-checkbox:checked');
+    const selectedIds = Array.from(checkedBoxes).map(cb => cb.closest('li').dataset.id);
+
+    if (selectedIds.length === 0) {
+      showConfirm('请先选择要删除的已完成项', () => {});
+      return;
+    }
+
+    showConfirm(`确定要删除选中的 ${selectedIds.length} 项已完成事项吗？`, async () => {
+      await clearSelectedDone(selectedIds);
       render();
     });
   });
