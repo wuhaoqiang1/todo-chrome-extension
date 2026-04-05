@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>待办事项</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1>📝 待办事项</h1>
+    </header>
+
+    <!-- Tab 切换 -->
+    <nav class="tabs">
+      <button class="tab active" data-tab="all">全部</button>
+      <button class="tab" data-tab="urgent">紧急</button>
+      <button class="tab" data-tab="done">已完成</button>
+    </nav>
+
+    <!-- 输入区 -->
+    <div class="input-area" id="inputArea">
+      <input type="text" id="todoInput" placeholder="输入待办..." maxlength="200">
+      <button id="addBtn" class="add-btn">＋</button>
+    </div>
+
+    <!-- 待办列表 -->
+    <ul class="todo-list" id="todoList"></ul>
+
+    <!-- 已完成列表 -->
+    <ul class="todo-list done-list" id="doneList"></ul>
+
+    <!-- 清除按钮 -->
+    <div class="clear-area" id="clearArea">
+      <button class="clear-btn" id="clearDoneBtn">清除已完成</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
